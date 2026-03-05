@@ -94,20 +94,18 @@ func (h *Handler) Blog(c *fiber.Ctx) error {
 	isLogged := sess != nil && sess.Get("user") != nil
 
 	data := fiber.Map{
-		"Title":          "Personal Blog",
-		"AuthorName":     "arif muftalib",
-		"PageTitle":      "Personal Blog Entries",
-		"Subtitle":       "Thoughts, experiences, and insights on technology and life.",
-		"Blogs":          blogData,
-		"CreatePostURL":  "/blog/form",
-		"CreatePostText": "Write New Post",
-		"IsLoggedIn":     isLogged,
-		"CurrentPage":    page,
-		"TotalPages":     totalPages,
-		"HasPrevious":    page > 1,
-		"HasNext":        page < totalPages,
-		"PreviousPage":   page - 1,
-		"NextPage":       page + 1,
+		"Title":       "Personal Blog",
+		"AuthorName":  "arif muftalib",
+		"PageTitle":   "Personal Blog Entries",
+		"Subtitle":    "Thoughts, experiences, and insights on technology and life.",
+		"Blogs":       blogData,
+		"IsLoggedIn":  isLogged,
+		"CurrentPage": page,
+		"TotalPages":  totalPages,
+		"HasPrevious": page > 1,
+		"HasNext":     page < totalPages,
+		"PreviousPage": page - 1,
+		"NextPage":    page + 1,
 	}
 
 	return c.Render("blog_index", data)
