@@ -60,6 +60,8 @@ func main() {
 	redisPort := helper.GetEnv("REDIS_PORT", "6379")
 	redisPassword := helper.GetEnv("REDIS_PASSWORD", "")
 
+	log.Printf("Redis config - Host: %s, Port: %s, Password set: %v", redisHost, redisPort, redisPassword != "")
+
 	var rdb *redis.Client
 	if redisHost != "" {
 		log.Println("Redis configuration found, connecting...")
