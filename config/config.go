@@ -25,7 +25,7 @@ func Setup() *fiber.App {
 	
 	return fiber.New(fiber.Config{
 		Views:         engine,
-		Prefork:       true,
+		Prefork:       false, // Disabled for cloud deployments
 		CaseSensitive: true,
 		StrictRouting: true,
 		ServerHeader:  "Fiber-Server",
