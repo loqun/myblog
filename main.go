@@ -27,9 +27,10 @@ var ctx = context.Background()
 
 func main() {
 
+	// Load .env file (only for local development)
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Error loading .env file")
+		log.Println("No .env file found (normal in production)")
 	}
 
 	//connect to sqlite database
@@ -54,26 +55,30 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//redis env data
-	redisHost := helper.GetEnv("REDIS_HOST", "127.0.0.1")
+	//redis env data (optional)
+	redisHost := helper.GetEnv("REDIS_HOST", "")
 	redisPort := helper.GetEnv("REDIS_PORT", "6379")
+	redisPassword := helper.GetEnv("REDIS_PASSWORD", "")
 
-	log.Println("Redis configuration loaded")
-	log.Println("Redis Port configured")
-	// log.Println("Redis Password: ", redisPassword)
+	var rdb *redis.Client
+	if redisHost != "" {
+		log.Println("Redis configuration found, connecting...")
+		addr := fmt.Sprintf("%s:%s", redisHost, redisPort)
+		rdb = redis.NewClient(&redis.Options{
+			Addr:     addr,
+			Password: redisPassword,
+		})
 
-	//connect to redis server
-	addr := fmt.Sprintf("%s:%s", redisHost, redisPort)
-	rdb := redis.NewClient(&redis.Options{
-		Addr: addr,
-		// Password: redisPassword,
-	})
-
-	_, err = rdb.Ping(ctx).Result()
-	if err != nil {
-		log.Fatal("Could not connect to Redis")
+		_, err = rdb.Ping(ctx).Result()
+		if err != nil {
+			log.Printf("Could not connect to Redis: %v", err)
+			log.Println("Continuing without Redis...")
+		} else {
+			fmt.Println("Successfully connected to Redis!")
+		}
+	} else {
+		log.Println("No REDIS_HOST set, skipping Redis connection")
 	}
-	fmt.Println("Successfully connected to Redis!")
 
 	app := config.Setup()
 	app.Use(cors.New())
@@ -127,6 +132,8 @@ func main() {
 	// wire routes, passing session store for auth middleware
 	routes.Setup(app, h, store)
 
-	defer rdb.Close()
+	if rdb != nil {
+		defer rdb.Close()
+	}
 	log.Fatal(app.Listen(":8000"))
 }
