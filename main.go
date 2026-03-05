@@ -1,0 +1,132 @@
+package main
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"os"
+
+	"github.com/go-redis/redis/v8"
+	"github.com/gofiber/contrib/websocket"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/csrf"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/joho/godotenv"
+	"github.com/loqun/fiber-server/config"
+	"github.com/loqun/fiber-server/handlers"
+	"github.com/loqun/fiber-server/helper"
+	"github.com/loqun/fiber-server/middleware"
+	"github.com/loqun/fiber-server/routes"
+	_ "github.com/mattn/go-sqlite3"
+
+	"log"
+)
+
+var ctx = context.Background()
+
+func main() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file")
+	}
+
+	//connect to sqlite database
+	database, err := sql.Open("sqlite3", "./myapp.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.Close()
+
+	//execute the schema sql to create tables if not exists
+	schema, err := os.ReadFile("schema.sql")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = database.Exec(string(schema))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Test connection
+	if err := database.Ping(); err != nil {
+		log.Fatal(err)
+	}
+
+	//redis env data
+	redisHost := helper.GetEnv("REDIS_HOST", "127.0.0.1")
+	redisPort := helper.GetEnv("REDIS_PORT", "6379")
+
+	log.Println("Redis configuration loaded")
+	log.Println("Redis Port configured")
+	// log.Println("Redis Password: ", redisPassword)
+
+	//connect to redis server
+	addr := fmt.Sprintf("%s:%s", redisHost, redisPort)
+	rdb := redis.NewClient(&redis.Options{
+		Addr: addr,
+		// Password: redisPassword,
+	})
+
+	_, err = rdb.Ping(ctx).Result()
+	if err != nil {
+		log.Fatal("Could not connect to Redis")
+	}
+	fmt.Println("Successfully connected to Redis!")
+
+	app := config.Setup()
+	app.Use(cors.New())
+	app.Use(csrf.New())
+
+	//serve images
+	app.Static("/", "./static/images")
+
+	//session store for the app
+	store := session.New()
+
+	//wesocket endpoint + middleware for websocket
+	wsGroup := app.Group("/ws", middleware.WebSocketMiddleware())
+	wsGroup.Get("/:id", websocket.New(func(c *websocket.Conn) {
+		// c.Locals is added to the *websocket.Conn
+		log.Println(c.Locals("allowed"))  // true
+		log.Println("WebSocket connection established")
+		log.Println("WebSocket query received")
+		log.Println("WebSocket session info") // ""
+
+		// websocket.Conn bindings https://pkg.go.dev/github.com/fasthttp/websocket?tab=doc#pkg-index
+		var (
+			mt  int
+			msg []byte
+			err error
+		)
+
+		for {
+			if mt, msg, err = c.ReadMessage(); err != nil {
+				log.Println("read:", err)
+				break
+			}
+			log.Printf("recv: %s", msg)
+
+			if err = c.WriteMessage(mt, msg); err != nil {
+				log.Println("write:", err)
+				break
+			}
+		}
+
+	}))
+
+	//initialize handlers with session store
+	h := handlers.New(store, database)
+
+	//middleware stack for web endpoints
+	app.Use(recover.New(recover.Config{
+		EnableStackTrace: true,
+	}))
+
+	// wire routes, passing session store for auth middleware
+	routes.Setup(app, h, store)
+
+	defer rdb.Close()
+	log.Fatal(app.Listen(":8000"))
+}

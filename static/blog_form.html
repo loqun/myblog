@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head.html" .}}
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"
+></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<link
+  href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css"
+  rel="stylesheet"
+/>
+<link
+  href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+  rel="stylesheet"
+/>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/toastr.min.js"></script>
+<link
+  href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css"
+  rel="stylesheet"
+/>
+</head>
+<body>
+    {{template "navbar.html" .}}
+
+    <main class="mx-auto min-w-4xl max-w-4xl px-6 py-12 bg-white/95 backdrop-blur-sm border-x-2 flex-1 shadow-sm">
+        <h1 class="title text-3xl font-bold my-8">{{.PageTitle}}</h1>
+
+        <form class="space-y-6">
+          <div>
+            <label class="title block text-sm font-medium text-gray-700 mb-2"
+              >Title</label
+            >
+            <input
+              type="text"
+              placeholder="{{.TitlePlaceholder}}"
+              class="title w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {{if .ShowTags}}
+          <div>
+            <label class="title block text-sm font-medium text-gray-700 mb-2"
+              >Tags</label
+            >
+            <select
+              id="multi-select"
+              data-placeholder="{{.TagsPlaceholder}}"
+              multiple="multiple"
+              class="w-full"
+            >
+              <option value="go">Go</option>
+              <option value="web-dev">Web Development</option>
+              <option value="fiber">Fiber</option>
+              <option value="design">Design</option>
+              <option value="ux">UX</option>
+              <option value="websockets">WebSockets</option>
+            </select>
+          </div>
+          {{end}}
+
+          <div>
+            <label class="title block text-sm font-medium text-gray-700 mb-2"
+              >Content</label
+            >
+            <div id="editor"></div>
+          </div>
+
+          <div class="mt-6 flex justify-end">
+            <button
+              type="button"
+              id="submitBtn"
+              class="title bg-gray-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              onclick="handleSubmit(event)"
+            >
+              {{.SubmitText}}
+            </button>
+          </div>
+        </form>
+    </main>
+
+    {{template "footer.html" .}}
+
+    <script>
+      let quill;
+
+      $(document).ready(function () {
+        $("#multi-select").select2();
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        quill = new Quill("#editor", {
+          theme: "snow",
+          placeholder: "{{.EditorPlaceholder}}",
+        });
+      });
+
+      const getCsrfToken = () => {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+          const [name, value] = cookie.trim().split("=");
+          if (name === "csrf_") return value;
+        }
+        return null;
+      };
+
+      const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        const title = document.querySelector('input[type="text"]').value;
+        const content = quill.root.innerHTML;
+        const selectedTags = $('#multi-select').val() || [];
+
+        if (!title || !content) {
+          toastr.error("Please fill in both title and content");
+          return;
+        }
+
+        const csrfToken = getCsrfToken();
+
+        try {
+          const response = await fetch("{{.SubmitURL}}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Csrf-Token": csrfToken
+            },
+            credentials: "include",
+            body: JSON.stringify({ title, content, tags: selectedTags }),
+          });
+
+          if (response.ok) {
+            toastr.success("{{.SuccessMessage}}");
+            document.querySelector('input[type="text"]').value = "";
+            quill.setContents([]);
+          } else {
+            toastr.error("Failed to submit blog");
+          }
+        } catch (error) {
+          toastr.error("Network error occurred");
+        }
+      };
+    </script>
+  </body>
+</html>

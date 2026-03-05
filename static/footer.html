@@ -1,0 +1,20 @@
+{{define "footer.html"}}
+<footer class="w-full border-t-2 bg-white">
+    <div class="max-w-4xl mx-auto px-6 py-8">
+        <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div class="text-center md:text-left">
+                <p class="text-body text-gray-600">
+                    © {{currentYear}} {{if .Name}}{{.Name}}{{else if .AuthorName}}{{.AuthorName}}{{else}}Portfolio{{end}}. Built with Go Fiber.
+                </p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="/blog" class="text-body text-gray-600 hover:text-gray-900">Blog</a>
+                <a href="/blog/form" class="text-body text-gray-600 hover:text-gray-900">Write</a>
+                {{range .ContactLinks}}
+                <a href="{{.URL}}" class="text-body text-gray-600 hover:text-gray-900">{{.Name}}</a>
+                {{end}}
+            </div>
+        </div>
+    </div>
+</footer>
+{{end}}

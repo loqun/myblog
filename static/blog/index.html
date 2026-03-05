@@ -1,0 +1,179 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{.Title}}</title>
+
+    <!--  latest tailwind css -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dosis:wght@500&display=swap"
+      rel="stylesheet"
+    />
+
+
+    <style>
+      .title {
+        font-family: "Libre Baskerville", serif;
+      }
+      .text-body {
+        font-family: "Dosis", sans-serif;
+      }
+      
+      /* Personalized touches */
+      .blog-card {
+        transition: all 0.3s ease;
+        padding: 1rem;
+        border-radius: 4px;
+      }
+      .blog-card:hover {
+        background-color: #1f2937;
+        color: white;
+      }
+      .blog-card:hover h3 {
+        color: white;
+      }
+      .blog-card:hover p {
+        color: #d1d5db;
+      }
+      .blog-card:hover .text-gray-500 {
+        color: #9ca3af;
+      }
+      .blog-card:hover .bg-gray-100 {
+        background-color: #374151;
+        color: #e5e7eb;
+      }
+      .blog-card:hover a {
+        color: #e5e7eb;
+      }
+      .date-divider::before {
+        content: "";
+        display: inline-block;
+        width: 4px;
+        height: 4px;
+        background: #6b7280;
+        border-radius: 50%;
+        margin: 0 8px;
+        vertical-align: middle;
+      }
+      
+      body {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        background-image: 
+          url("data:image/svg+xml,%3Csvg width='120' height='60' viewBox='0 0 120 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23cbd5e1' fill-opacity='0.4'%3E%3Cpath d='M0 30c20-8 40-8 60 0s40 8 60 0v2c-20 8-40 8-60 0s-40-8-60 0v-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        background-size: 120px 60px;
+      }
+    </style>
+    
+  </head>
+  <body>
+
+    <nav class=" w-full p-4 border-y-2 bg-white ">
+      <div class="max-w-7xl mx-auto flex justify-between items-center ">
+        <a href="/" class="text-black text-lg font-semibold title">arif muftalib</a>
+        <!-- <a href="/blog" class="text-black text-2xl font-semibold">Blog</a> -->
+      </div>
+    </nav>
+
+    <main class="mx-auto max-w-3xl p-4 bg-white/95 backdrop-blur-sm border-x-2 min-h-screen shadow-sm">
+      <div class="px-3">
+        <header class="text-center mb-12 border-b border-gray-100 pb-8">
+          <h1 class="title text-4xl font-bold my-8 text-gray-900">Personal Blog Entries</h1>
+          <p class="text-body text-lg text-gray-600 leading-relaxed italic">
+            Thoughts, experiences, and insights on technology and life.
+          </p>
+        </header>
+
+        <div class="space-y-8">
+          <!-- Blog Card 1 -->
+          <article class="blog-card border-b border-gray-200 pb-8 transition-all duration-200">
+            <div class="mb-4">
+              <h3 class="title text-xl font-bold text-gray-900 mb-2 hover:text-gray-700 cursor-pointer">
+                Building Modern Web Applications with Go Fiber
+              </h3>
+              <div class="text-body text-sm text-gray-500 mb-3">
+                <span>December 15, 2024</span><span class="date-divider"></span><span>5 min read</span>
+              </div>
+            </div>
+            <p class="text-body text-sm text-gray-700 leading-relaxed mb-4">
+              Exploring the power of Go Fiber framework for building fast, lightweight web applications. 
+              From setting up middleware to handling WebSocket connections, here's what I've learned...
+            </p>
+            <div class="flex items-center justify-between">
+              <div class="flex gap-2">
+                <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm text-body">Go</span>
+                <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm text-body">Web Dev</span>
+              </div>
+              <a href="#" class="text-body text-gray-600 hover:text-gray-900 font-medium">Read more →</a>
+            </div>
+          </article>
+
+          <!-- Blog Card 2 -->
+          <article class="blog-card border-b border-gray-200 pb-8 transition-all duration-200">
+            <div class="mb-4">
+              <h3 class="title text-xl font-bold text-gray-900 mb-2 hover:text-gray-700 cursor-pointer">
+                {{.Blogs.Title}}
+              </h3>
+              <div class="text-body text-sm text-gray-500 mb-3">
+                <span>December 10, 2024</span><span class="date-divider"></span><span>3 min read</span>
+              </div>
+            </div>
+            <p class="text-body text-sm text-gray-700 leading-relaxed mb-4">
+              Less is more. How embracing minimalism in design leads to better user experiences 
+              and cleaner codebases. A reflection on simplicity in the digital age...
+            </p>
+            <div class="flex items-center justify-between">
+              <div class="flex gap-2">
+                <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm text-body">Design</span>
+                <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm text-body">UX</span>
+              </div>
+              <a href="#" class="text-body text-gray-600 hover:text-gray-900 font-medium">Read more →</a>
+            </div>
+          </article>
+
+          <!-- Blog Card 3 -->
+          <article class="blog-card border-b border-gray-200 pb-8 transition-all duration-200">
+            <div class="mb-4">
+              <h3 class="title text-xl font-bold text-gray-900 mb-2 hover:text-gray-700 cursor-pointer">
+                Real-time Applications: WebSockets vs Server-Sent Events
+              </h3>
+              <div class="text-body text-sm text-gray-500 mb-3">
+                <span>December 5, 2024</span><span class="date-divider"></span><span>7 min read</span>
+              </div>
+            </div>
+            <p class="text-body text-sm text-gray-700 leading-relaxed mb-4">
+              Comparing different approaches to real-time communication in web applications. 
+              When to use WebSockets, when SSE is enough, and the trade-offs involved...
+            </p>
+            <div class="flex items-center justify-between">
+              <div class="flex gap-2">
+                <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm text-body">WebSockets</span>
+                <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm text-body">Real-time</span>
+              </div>
+              <a href="#" class="text-body text-gray-600 hover:text-gray-900 font-medium">Read more →</a>
+            </div>
+          </article>
+        </div>
+
+        {{if .IsLoggedIn}}
+        <div class="text-center mt-12 pb-8">
+          <a href="{{.CreatePostURL}}" class="title bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition-colors">
+            {{.CreatePostText}}
+          </a>
+        </div>
+        {{end}}
+      </div>
+    </main>
+
+
+
+
+  </body>
+</html>
