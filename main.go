@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/contrib/websocket"
@@ -59,6 +60,16 @@ func main() {
 	redisHost := helper.GetEnv("REDIS_HOST", "")
 	redisPort := helper.GetEnv("REDIS_PORT", "6379")
 	redisPassword := helper.GetEnv("REDIS_PASSWORD", "")
+
+	// Clean up redis host if it contains protocol or port
+	if redisHost != "" {
+		// Remove redis:// prefix if present
+		redisHost = strings.TrimPrefix(redisHost, "redis://")
+		// Remove port if included in host
+		if idx := strings.LastIndex(redisHost, ":"); idx != -1 {
+			redisHost = redisHost[:idx]
+		}
+	}
 
 	log.Printf("Redis config - Host: %s, Port: %s, Password set: %v", redisHost, redisPort, redisPassword != "")
 
