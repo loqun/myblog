@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/contrib/websocket"
+	_ "github.com/gofiber/fiber/v2" // imported for type definitions
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/csrf"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -95,13 +96,20 @@ func main() {
 
 	app := config.Setup()
 	app.Use(cors.New())
-	app.Use(csrf.New())
 
 	//serve images
 	app.Static("/", "./static/images")
 
 	//session store for the app
 	store := session.New()
+
+	// CSRF protection for all routes
+	app.Use(csrf.New(csrf.Config{
+		KeyLookup:      "form:_csrf",
+		CookieName:     "csrf_",
+		CookieSameSite: "Lax",
+		ContextKey:     "csrf",
+	}))
 
 	//wesocket endpoint + middleware for websocket
 	wsGroup := app.Group("/ws", middleware.WebSocketMiddleware())

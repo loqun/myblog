@@ -126,6 +126,7 @@ func (h *Handler) LoginForm(c *fiber.Ctx) error {
 	return c.Render("login", fiber.Map{
 		"Title":  "Login",
 		"Action": "/login",
+		"csrf":   c.Locals("csrf"),
 	})
 }
 
@@ -136,6 +137,7 @@ func (h *Handler) AdminLoginForm(c *fiber.Ctx) error {
 	return c.Render("login", fiber.Map{
 		"Title":  "Admin Login",
 		"Action": "/backoffice/login",
+		"csrf":   c.Locals("csrf"),
 	})
 }
 
@@ -146,14 +148,15 @@ type LoginRequest struct {
 
 func (h *Handler) ProcessLogin(c *fiber.Ctx) error {
 
+	// Authentication logic using environment variables
+	adminUser := os.Getenv("ADMIN_USERNAME")
+	adminPass := os.Getenv("ADMIN_PASSWORD")
+	log.Printf("Admin credentials - Username: %s, Password: %s\n", adminUser, adminPass)
+	
 	var req LoginRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
 	}
-
-	// Authentication logic using environment variables
-	adminUser := os.Getenv("ADMIN_USERNAME")
-	adminPass := os.Getenv("ADMIN_PASSWORD")
 	if adminUser == "" {
 		adminUser = "admin"
 	}
